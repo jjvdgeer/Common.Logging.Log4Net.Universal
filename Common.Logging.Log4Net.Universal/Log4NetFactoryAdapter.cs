@@ -15,6 +15,8 @@
 using System;
 using Common.Logging.Configuration;
 using System.IO;
+using System.Reflection;
+using log4net.Core;
 
 namespace Common.Logging.Log4Net.Universal {
     /// <summary>
@@ -43,15 +45,16 @@ namespace Common.Logging.Log4Net.Universal {
                 }
             }
 
+            var repository = LoggerManager.GetRepository(Assembly.GetCallingAssembly());
             switch (configType) {
                 case "INLINE":
-                    log4net.Config.XmlConfigurator.Configure();
+                    log4net.Config.XmlConfigurator.Configure(repository);
                     break;
                 case "FILE":
-                    log4net.Config.XmlConfigurator.Configure(new FileInfo(configFile));
+                    log4net.Config.XmlConfigurator.Configure(repository, new FileInfo(configFile));
                     break;
                 case "FILE-WATCH":
-                    log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(configFile));
+                    log4net.Config.XmlConfigurator.ConfigureAndWatch(repository, new FileInfo(configFile));
                     break;
                 case "EXTERNAL":
                     // Log4net will be configured outside of Common.Logging
@@ -66,7 +69,7 @@ namespace Common.Logging.Log4Net.Universal {
         }
 
         public ILog GetLogger(string name) {
-            return new Log4NetLogger(log4net.LogManager.GetLogger(name));
+            return new Log4NetLogger(log4net.LogManager.GetLogger(Assembly.GetCallingAssembly(), name));
         }
     }
 }
