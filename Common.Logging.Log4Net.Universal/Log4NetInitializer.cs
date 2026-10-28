@@ -1,4 +1,5 @@
-﻿using Common.Logging.Configuration;
+﻿using System;
+using Common.Logging.Configuration;
 using Microsoft.Extensions.Configuration;
 
 namespace Common.Logging.Log4Net.Universal
@@ -25,8 +26,23 @@ namespace Common.Logging.Log4Net.Universal
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .Build();
 
+            Initialize(configBuilder);
+        }
+
+        /// <summary>
+        /// Initializes Common.Logging from the LogConfiguration section of an existing configuration.
+        /// </summary>
+        /// <param name="configuration">The application's root configuration.</param>
+        /// <exception cref="ArgumentNullException">The configuration is null.</exception>
+        public static void Initialize(IConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException(nameof(configuration));
+            }
+
             LogConfiguration logConfiguration = new LogConfiguration();
-            configBuilder.GetSection("LogConfiguration").Bind(logConfiguration);
+            configuration.GetSection("LogConfiguration").Bind(logConfiguration);
             LogManager.Configure(logConfiguration);
         }
     }
